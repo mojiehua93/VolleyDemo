@@ -1,5 +1,6 @@
 package com.example.mojiehua93.volleydemo;
 
+import android.annotation.TargetApi;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
@@ -19,6 +20,7 @@ import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
@@ -33,23 +35,63 @@ public class MainActivity extends AppCompatActivity {
         mRequestQueue = MyApplication.getRequestQueue();
 //        volleyStringRequestGet(sUrl);
 //        volleyJsonObjectGet(sUrl);
-        volleyStringRequestPost(sUrl);
+//        volleyStringRequestPost(sUrl);
+//        volleyJsonObjectPost(sUrl);
+        volleyCustomStringRequestGet(sUrl);
+    }
+
+    private void volleyCustomStringRequestGet(String url) {
+        VolleyRequest.requestGet(getApplicationContext(), url, "string_get",
+                new VolleyInterface(getApplicationContext(), VolleyInterface.mListener,
+                        VolleyInterface.mErrorListener) {
+            @Override
+            public void onRequestSuccess(String response) {
+                doResponse(response);
+            }
+
+            @Override
+            public void onRequestError(VolleyError error) {
+                doErrorResponse(error.toString());
+            }
+        });
+    }
+
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    private void volleyJsonObjectPost(String url) {
+        String urlPost = url.substring(0, url.lastIndexOf('?') + 1);
+        ArrayMap<String, String> map = new ArrayMap<>();
+        map.put("type", "4");
+        map.put("num", "30");
+        JSONObject object = new JSONObject(map);
+        JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, urlPost,
+                null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                doResponse(response.toString());
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                doErrorResponse(error.toString());
+            }
+        });
+        objectRequest.setTag(sUrl);
+        mRequestQueue.add(objectRequest);
     }
 
     private void volleyStringRequestPost(String url) {
         String urlPost = url.substring(0,url.lastIndexOf('?') + 1);
+        Log.d(TAG, "volleyStringRequestPost: uroPost = " + urlPost);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, urlPost,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Toast.makeText(getApplicationContext(), response,
-                                Toast.LENGTH_LONG).show();
+                        doResponse(response);
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getApplicationContext(), error.toString(),
-                        Toast.LENGTH_LONG).show();
+                doErrorResponse(error.toString());
             }
         }) {
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -58,10 +100,13 @@ public class MainActivity extends AppCompatActivity {
                 ArrayMap<String, String> map = new ArrayMap<>();
                 map.put("type", "4");
                 map.put("num", "30");
+//                Map<String, String> map = new HashMap<String, String>();
+//                map.put("type", "4");
+//                map.put("num", "30");
                 return map;
             }
         };
-        stringRequest.setTag(urlPost);
+        stringRequest.setTag(sUrl);
         mRequestQueue.add(stringRequest);
     }
 
@@ -70,15 +115,13 @@ public class MainActivity extends AppCompatActivity {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Toast.makeText(getApplicationContext(), response.toString(),
-                                Toast.LENGTH_LONG).show();
+                        doResponse(response.toString());
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(getApplicationContext(), error.toString(),
-                                Toast.LENGTH_LONG).show();
+                        doErrorResponse(error.toString());
                     }
                 });
         objectRequest.setTag(url);
@@ -90,20 +133,33 @@ public class MainActivity extends AppCompatActivity {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Log.d(TAG, "onResponse: response = " + response);
-                        Toast.makeText(getApplicationContext(), response, Toast.LENGTH_LONG)
-                                .show();
+                        doResponse(response);
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getApplicationContext(), error.toString(), Toast.LENGTH_LONG)
-                        .show();
+                doErrorResponse(error.toString());
             }
         });
-        stringRequest.setTag(url);
+        stringRequest.setTag(sUrl);
         mRequestQueue.add(stringRequest);
     }
 
+    private void doResponse(String response) {
+        Toast.makeText(getApplicationContext(), response,
+                Toast.LENGTH_LONG).show();
+        Log.d(TAG, "onResponse: response = " + response.toString());
+    }
 
+    private void doErrorResponse(String error) {
+        Toast.makeText(getApplicationContext(), error.toString(), Toast.LENGTH_LONG)
+                .show();
+        Log.d(TAG, "doErrorResponse: error = " + error);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mRequestQueue.cancelAll(sUrl);
+    }
 }
