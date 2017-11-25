@@ -1,6 +1,7 @@
 package com.example.mojiehua93.volleydemo;
 
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
@@ -8,6 +9,8 @@ import android.os.Bundle;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -28,16 +31,28 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private static String sUrl = "http://www.imooc.com/api/teacher?type=4&num=30";
     private RequestQueue mRequestQueue;
+    private Button mImageRequestButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mRequestQueue = MyApplication.getRequestQueue();
+        initView();
 //        volleyStringRequestGet(sUrl);
 //        volleyJsonObjectGet(sUrl);
 //        volleyStringRequestPost(sUrl);
 //        volleyJsonObjectPost(sUrl);
         volleyCustomStringRequestGet(sUrl);
+    }
+
+    private void initView() {
+        findViewById(R.id.image_request).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, ImageRequestActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void volleyCustomStringRequestGet(String url) {
@@ -46,12 +61,12 @@ public class MainActivity extends AppCompatActivity {
                         VolleyInterface.mErrorListener) {
             @Override
             public void onRequestSuccess(String response) {
-                doResponse(response);
+                VolleyResponse.doResponse(getApplicationContext(), response, TAG);
             }
 
             @Override
             public void onRequestError(VolleyError error) {
-                doErrorResponse(error.toString());
+                VolleyResponse.doErrorResponse(getApplicationContext(), error.toString(), TAG);
             }
         });
     }
@@ -67,12 +82,13 @@ public class MainActivity extends AppCompatActivity {
                 null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
-                doResponse(response.toString());
+                VolleyResponse.doResponse(getApplicationContext(), response.toString(), TAG);
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                doErrorResponse(error.toString());
+                VolleyResponse.doErrorResponse(getApplicationContext(), error.toString(),
+                        TAG);
             }
         });
         objectRequest.setTag(sUrl);
@@ -86,12 +102,14 @@ public class MainActivity extends AppCompatActivity {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        doResponse(response);
+                        VolleyResponse.doResponse(getApplicationContext(), response,
+                                TAG);
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                doErrorResponse(error.toString());
+                VolleyResponse.doErrorResponse(getApplicationContext(), error.toString(),
+                        TAG);
             }
         }) {
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -115,13 +133,15 @@ public class MainActivity extends AppCompatActivity {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        doResponse(response.toString());
+                        VolleyResponse.doResponse(getApplicationContext(), response.toString(),
+                                TAG);
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        doErrorResponse(error.toString());
+                        VolleyResponse.doErrorResponse(getApplicationContext(), error.toString(),
+                                TAG);
                     }
                 });
         objectRequest.setTag(url);
@@ -133,29 +153,31 @@ public class MainActivity extends AppCompatActivity {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        doResponse(response);
+                        VolleyResponse.doResponse(getApplicationContext(), response,
+                                TAG);
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                doErrorResponse(error.toString());
+                VolleyResponse.doErrorResponse(getApplicationContext(), error.toString(),
+                        TAG);
             }
         });
         stringRequest.setTag(sUrl);
         mRequestQueue.add(stringRequest);
     }
 
-    private void doResponse(String response) {
-        Toast.makeText(getApplicationContext(), response,
-                Toast.LENGTH_LONG).show();
-        Log.d(TAG, "onResponse: response = " + response.toString());
-    }
-
-    private void doErrorResponse(String error) {
-        Toast.makeText(getApplicationContext(), error.toString(), Toast.LENGTH_LONG)
-                .show();
-        Log.d(TAG, "doErrorResponse: error = " + error);
-    }
+//    private void doResponse(String response) {
+//        Toast.makeText(getApplicationContext(), response,
+//                Toast.LENGTH_LONG).show();
+//        Log.d(TAG, "onResponse: response = " + response.toString());
+//    }
+//
+//    private void doErrorResponse(String error) {
+//        Toast.makeText(getApplicationContext(), error.toString(), Toast.LENGTH_LONG)
+//                .show();
+//        Log.d(TAG, "doErrorResponse: error = " + error);
+//    }
 
     @Override
     protected void onStop() {
