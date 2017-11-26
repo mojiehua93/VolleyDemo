@@ -11,6 +11,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageRequest;
+import com.android.volley.toolbox.NetworkImageView;
 
 /**
  * Created by MOJIEHUA93 on 2017/11/25.
@@ -25,18 +26,26 @@ public class ImageRequestActivity extends AppCompatActivity {
     private RequestQueue mRequestQueue;
     private ImageLoader mImageLoader;
     private ImageLoader.ImageListener mImageListener;
+    private NetworkImageView mNetworkImageView;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_request);
         mRequestQueue = MyApplication.getRequestQueue();
         initView();
+        mImageLoader = new ImageLoader(mRequestQueue, new BitmapCache());
 //        volleyImageRequest(sUrl);
         volleyImageLoader(sUrl);
+        volleyGetNetworkImageView();
+    }
+
+    private void volleyGetNetworkImageView() {
+        mNetworkImageView.setDefaultImageResId(R.mipmap.ic_launcher);
+        mNetworkImageView.setErrorImageResId(R.mipmap.ic_launcher_round);
+        mNetworkImageView.setImageUrl(sUrl, mImageLoader);
     }
 
     private void volleyImageLoader(String url) {
-        mImageLoader = new ImageLoader(mRequestQueue, new BitmapCache());
         mImageListener = ImageLoader.getImageListener(mImageView, R.mipmap.ic_launcher,
                 R.mipmap.ic_launcher_round);
         mImageLoader.get(url, mImageListener);
@@ -65,5 +74,6 @@ public class ImageRequestActivity extends AppCompatActivity {
 
     private void initView() {
         mImageView = findViewById(R.id.iv_image_request);
+        mNetworkImageView = findViewById(R.id.network_iamgeview);
     }
 }

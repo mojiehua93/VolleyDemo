@@ -10,4 +10,10 @@
         android:id="@+id/iv_image_request"
     />
 
+    <com.android.volley.toolbox.NetworkImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/network_iamgeview"
+        />
+
 </LinearLayout>
