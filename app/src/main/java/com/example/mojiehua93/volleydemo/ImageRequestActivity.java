@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageRequest;
 
 /**
@@ -18,17 +19,27 @@ import com.android.volley.toolbox.ImageRequest;
 public class ImageRequestActivity extends AppCompatActivity {
 
     public static final String TAG = "ImageRequestActivity";
-    private static String sUrl = "https://www.baidu.czom/img/bdlogo.png";
+    private static String sUrl = "https://www.baidu.com/img/bdlogo.png";
 
     private ImageView mImageView;
     private RequestQueue mRequestQueue;
+    private ImageLoader mImageLoader;
+    private ImageLoader.ImageListener mImageListener;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_request);
         mRequestQueue = MyApplication.getRequestQueue();
         initView();
-        volleyImageRequest(sUrl);
+//        volleyImageRequest(sUrl);
+        volleyImageLoader(sUrl);
+    }
+
+    private void volleyImageLoader(String url) {
+        mImageLoader = new ImageLoader(mRequestQueue, new BitmapCache());
+        mImageListener = ImageLoader.getImageListener(mImageView, R.mipmap.ic_launcher,
+                R.mipmap.ic_launcher_round);
+        mImageLoader.get(url, mImageListener);
     }
 
     private void volleyImageRequest(String url) {
